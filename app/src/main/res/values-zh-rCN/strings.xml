@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">游戏</string>
+    <string name="app_tagline">a</string>
+    <string name="game_view_content_description">Game view</string>
+    <string name="please_wait">请稍后…</string>
+    <string name="loading">努力加载中…</string>
+    <string name="start">开始</string>
+    <string name="settings">设置</string>
+    <string name="open_this">如果你觉得卡的话，打开这个</string>
+    <string name="dont_touch">不要点啊</string>
+    <string name="change_video">更换视频</string>
+</resources>

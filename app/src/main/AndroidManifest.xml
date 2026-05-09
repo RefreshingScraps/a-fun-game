@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--检测当前⽹络状态是2G、3G、4G还是WiFi-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--联⽹权限-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--获取设备标识IMEI。⽤于标识⽤户-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--读写存储权限-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="AllFilesAccessPolicy,ScopedStorage" />
+    <!--获取MAC地址，⽤于标识⽤户-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--安装应⽤权限-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
+    <!--定位权限，不强制要求-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/app_icon"
+        android:label="@string/app_name"
+        android:name=".MyApplication"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.afungame"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup" >
+ 
+        <activity android:name=".SplashActivity" android:exported="true" android:screenOrientation="landscape" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity" android:exported="false" android:screenOrientation="landscape"/>
+        <activity android:name=".LoadingActivity" android:exported="false" android:screenOrientation="landscape" />
+        <activity android:name=".SettingsActivity" android:exported="false" android:screenOrientation="landscape" />
+        <activity android:name=".BrowserActivity" android:exported="true" android:screenOrientation="landscape"/>
+        <activity android:name=".junkcode.Vz" android:exported="true" android:screenOrientation="landscape"/>
+            
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
+        <!-- 声明SDK所需要的组件 -->
+        <service android:name="com.qq.e.comm.DownloadService" android:exported="false" />
+        <!-- 请开发者注意字母的大小写，ADActivity，而不是AdActivity -->
+        <activity android:name="com.qq.e.ads.ADActivity" android:multiprocess="true"/>
+        <activity
+            android:name="com.qq.e.ads.PortraitADActivity"
+            android:screenOrientation="portrait"
+            android:multiprocess="true"/>
+        <activity android:name="com.qq.e.ads.LandscapeADActivity" android:multiprocess="true"/>
+        <!-- 用于激励视频可选广告的横屏透明背景activity -->
+        <activity
+            android:name="com.qq.e.ads.RewardvideoLandscapeADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Light.NoTitleBar"
+            android:multiprocess="true">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity
+            android:name="com.qq.e.ads.DialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:multiprocess="true"/>
+
+        <provider
+            android:name="com.kwad.sdk.api.proxy.app.AdSdkFileProvider"
+            android:authorities="${applicationId}.adFileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/ksad_file_paths" />
+        </provider>
+    </application>
+
+</manifest>

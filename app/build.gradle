@@ -1,0 +1,401 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+
+// ========== 签名配置 ==========
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else {
+    println "[警告] keystore.properties 不存在，将使用默认调试签名"
+    keystoreProperties['keyAlias'] = 'androiddebugkey'
+    keystoreProperties['keyPassword'] = 'android'
+    keystoreProperties['storeFile'] = 'debug.keystore'
+    keystoreProperties['storePassword'] = 'android'
+}
+
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+android {
+    namespace 'com.freshingair.afungame'
+    //noinspection GradleDependency
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.freshingair.afungame'
+        minSdk 24
+        //noinspection OldTargetApi
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        ndk {
+            //noinspection ChromeOsAbiSupport
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
+    }
+    signingConfigs {
+        debug {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystorePropertiesFile.exists() ?
+                file(keystoreProperties['storeFile']) :
+                file(System.getProperty("user.home") + "/.android/debug.keystore")
+            storePassword keystoreProperties['storePassword']
+        }
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            buildConfigField "boolean", "DEBUG", "true"
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "DEBUG", "false"
+        }
+    }
+    
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+}
+
+dependencies {
+    implementation libs.ads.mobile.sdk
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.constraintlayout
+    
+    implementation files("libs/unityLibrary-release.aar")
+    implementation libs.union
+    implementation files("libs/ad-kuaishou-ad-4.12.20.1.aar")
+    
+    implementation libs.asm
+    implementation libs.asm.commons
+    
+    implementation libs.androidx.annotation
+}
+
+// ========== ASM 花指令插桩（完全线性版本 - 无跳转）==========
+
+
+project.afterEvaluate {
+    tasks.matching { task ->
+        task.name.contains("compile") &&
+        !task.name.contains("Debug") &&
+        (task.name.contains("Java") || task.name.contains("Kotlin")) &&
+        !task.name.contains("Test") && 
+        !task.name.contains("Desugar")
+    }.configureEach { task ->
+        task.doLast {
+            def outputDir = findOutputDirectory(task)
+            if (outputDir != null && outputDir.exists()) {
+                println "\n===== ASM 开始处理: $task.name ====="
+                doJunkInject(outputDir)
+            }
+        }
+    }
+}
+
+import org.objectweb.asm.*
+import java.nio.file.*
+
+File findOutputDirectory(task) {
+    try {
+        if (task.hasProperty('destinationDirectory')) {
+            return task.destinationDirectory.get().asFile
+        }
+        if (task.hasProperty('destinationDir')) {
+            return task.destinationDir
+        }
+        task.outputs.files.find { it.isDirectory() && (it.name.contains("classes") || it.name.contains("kotlin")) }
+    } catch (e) {
+        println "[ASM] 获取输出目录失败: ${e.message}"
+        return null
+    }
+}
+
+void doJunkInject(File classDir) {
+    if (!classDir.exists()) return
+
+    Random rand = new Random()
+    int success = 0, skipped = 0, failed = 0
+
+    classDir.eachFileRecurse { file ->
+        if (!file.name.endsWith('.class')) return
+
+        def fileName = file.name
+        if (fileName == 'BuildConfig.class' || fileName.matches(/^R(\$.*)?\.class$/)) {
+            skipped++
+            return
+        }
+
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath())
+            ClassReader cr = new ClassReader(bytes)
+
+            // 使用 COMPUTE_FRAMES 自动计算栈帧
+            ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES)
+
+            JunkInjector injector = new JunkInjector(Opcodes.ASM9, cw, rand, file.name)
+            cr.accept(injector, ClassReader.EXPAND_FRAMES)
+
+            if (injector.modified) {
+                Files.write(file.toPath(), cw.toByteArray())
+                success++
+            } else {
+                skipped++
+            }
+
+        } catch (Exception e) {
+            failed++
+            println "  [失败] $file.name: ${e.message}"
+        }
+    }
+
+    println "  成功: $success, 跳过: $skipped, 失败: $failed"
+}
+
+class JunkInjector extends ClassVisitor {
+    final Random rnd
+    final String className
+    boolean modified = false
+    int methodCount = 0
+
+    JunkInjector(int api, ClassVisitor cv, Random r, String name) {
+        super(api, cv)
+        this.rnd = r
+        this.className = name
+    }
+
+    @Override
+    MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] ex) {
+        MethodVisitor mv = super.visitMethod(access, name, desc, sig, ex)
+
+        if (name == "<init>" || name == "<clinit>" ||
+                (access & Opcodes.ACC_ABSTRACT) != 0 ||
+                (access & Opcodes.ACC_NATIVE) != 0) {
+            return mv
+        }
+
+        methodCount++
+        modified = true
+        return new JunkMethodVisitor(Opcodes.ASM9, mv, rnd, access, name, desc)
+    }
+
+    @Override
+    void visitEnd() {
+        if (methodCount > 0) {
+            println "  类 $className: 注入 $methodCount 个方法"
+        }
+        super.visitEnd()
+    }
+}
+
+/**
+ * 纯线性花指令注入器
+ *
+ * 核心原则：
+ * 1. ❌ 不使用任何跳转指令（GOTO/IFEQ/IFNE/IF_ICMPxx 等）
+ * 2. ❌ 不使用 LDC 加载常量
+ * 3. ❌ 不占用局部变量槽
+ * 4. ✅ 只使用基本栈操作：ICONST, IADD, ISUB, IMUL, IDIV, INEG, DUP, POP, SWAP, IXOR, IAND, IOR
+ * 5. ✅ 保证进入和退出时栈深度完全一致（栈中性）
+ */
+class JunkMethodVisitor extends MethodVisitor {
+    final Random rnd
+    int junkCount = 0
+
+    JunkMethodVisitor(int api, MethodVisitor mv, Random r, int access, String name, String desc) {
+        super(api, mv)
+        this.rnd = r
+    }
+
+    @Override
+    void visitCode() {
+        // ===== 花指令组1: 整数运算抵消（多个模式随机） =====
+        injectMathNeutral1()
+        injectMathNeutral2()
+        injectMathNeutral3()
+
+        // ===== 花指令组2: 栈操作混淆 =====
+        injectStackObfuscation()
+
+        // ===== 花指令组3: 位运算抵消 =====
+        injectBitwiseNeutral()
+
+        // ===== 花指令组4: DUP/POP/SWAP 序列 =====
+        injectDupPopSequence()
+
+        super.visitCode()
+    }
+
+    /**
+     * 模式1: push A, push B, add, push B, sub, pop
+     * 栈变化: [] -> [A] -> [A,B] -> [A+B] -> [A+B,B] -> [A] -> []
+     */
+    private void injectMathNeutral1() {
+        int a = rnd.nextInt(50) + 1
+        int b = rnd.nextInt(50) + 1
+
+        mv.visitLdcInsn(a)         // push a
+        mv.visitLdcInsn(b)         // push b
+        mv.visitInsn(Opcodes.IADD) // a+b
+        mv.visitLdcInsn(b)         // push b
+        mv.visitInsn(Opcodes.ISUB) // (a+b)-b = a
+        mv.visitInsn(Opcodes.POP)  // pop a
+        junkCount++
+    }
+
+    /**
+     * 模式2: push A, push B, mul, push B, div, pop
+     * 栈变化: [] -> [A] -> [A,B] -> [A*B] -> [A*B,B] -> [A] -> []
+     */
+    private void injectMathNeutral2() {
+        int a = rnd.nextInt(20) + 2  // 避免0/1
+        int b = rnd.nextInt(10) + 2
+
+        mv.visitLdcInsn(a)
+        mv.visitLdcInsn(b)
+        mv.visitInsn(Opcodes.IMUL)  // a*b
+        mv.visitLdcInsn(b)
+        mv.visitInsn(Opcodes.IDIV)  // (a*b)/b = a
+        mv.visitInsn(Opcodes.POP)
+        junkCount++
+    }
+
+    /**
+     * 模式3: push A, neg, neg, pop
+     * 栈变化: [] -> [A] -> [-A] -> [A] -> []
+     */
+    private void injectMathNeutral3() {
+        int a = rnd.nextInt(100) + 1
+
+        mv.visitLdcInsn(a)
+        mv.visitInsn(Opcodes.INEG)  // -a
+        mv.visitInsn(Opcodes.INEG)  // -(-a) = a
+        mv.visitInsn(Opcodes.POP)
+        junkCount++
+    }
+
+    /**
+     * 栈操作混淆: DUP, POP, SWAP 组合
+     * 最终栈为空
+     */
+    private void injectStackObfuscation() {
+        int pattern = rnd.nextInt(4)
+        switch (pattern) {
+            case 0:
+                // push 0, dup, pop, pop
+                mv.visitInsn(Opcodes.ICONST_0)
+                mv.visitInsn(Opcodes.DUP)
+                mv.visitInsn(Opcodes.POP)
+                mv.visitInsn(Opcodes.POP)
+                break
+
+            case 1:
+                // push 1, push 2, swap, pop, pop
+                mv.visitInsn(Opcodes.ICONST_1)
+                mv.visitInsn(Opcodes.ICONST_2)
+                mv.visitInsn(Opcodes.SWAP)
+                mv.visitInsn(Opcodes.POP)
+                mv.visitInsn(Opcodes.POP)
+                break
+
+            case 2:
+                // push 3, dup_x1 (需要两个值), pop, pop
+                mv.visitInsn(Opcodes.ICONST_3)
+                mv.visitInsn(Opcodes.ICONST_4)
+                mv.visitInsn(Opcodes.DUP_X1)
+                mv.visitInsn(Opcodes.POP)
+                mv.visitInsn(Opcodes.POP)
+                mv.visitInsn(Opcodes.POP)
+                break
+
+            case 3:
+                // push 5, dup2 (需要两个值，先push一个再dup成两个)
+                mv.visitInsn(Opcodes.ICONST_5)
+                mv.visitInsn(Opcodes.ICONST_0)
+                mv.visitInsn(Opcodes.DUP2)
+                mv.visitInsn(Opcodes.POP2)
+                mv.visitInsn(Opcodes.POP2)
+                break
+        }
+        junkCount++
+    }
+
+    /**
+     * 位运算抵消: XOR/AND/OR
+     * 例如: push X, push -1, xor, push -1, xor, pop
+     */
+    private void injectBitwiseNeutral() {
+        int x = rnd.nextInt(1000) + 1
+
+        mv.visitLdcInsn(x)
+        mv.visitInsn(Opcodes.ICONST_M1)  // -1 = 0xFFFFFFFF
+        mv.visitInsn(Opcodes.IXOR)       // x ^ 0xFF...FF = ~x
+        mv.visitInsn(Opcodes.ICONST_M1)
+        mv.visitInsn(Opcodes.IXOR)       // ~x ^ 0xFF...FF = x
+        mv.visitInsn(Opcodes.POP)
+        junkCount++
+
+        // 再来一个 AND 版本
+        int y = rnd.nextInt(1000) + 1
+
+        mv.visitLdcInsn(y)
+        mv.visitInsn(Opcodes.ICONST_M1)
+        mv.visitInsn(Opcodes.IAND)       // y & 0xFF...FF = y
+        mv.visitInsn(Opcodes.POP)
+        junkCount++
+    }
+
+    /**
+     * DUP/POP 多层级序列
+     */
+    private void injectDupPopSequence() {
+        mv.visitInsn(Opcodes.ICONST_0)
+        mv.visitInsn(Opcodes.DUP)
+        mv.visitInsn(Opcodes.DUP)
+        mv.visitInsn(Opcodes.POP)
+        mv.visitInsn(Opcodes.POP)
+        mv.visitInsn(Opcodes.POP)
+        junkCount++
+    }
+
+    /**
+     * 在返回指令前也注入花指令
+     */
+    @Override
+    void visitInsn(int opcode) {
+        if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+            // 返回前注入栈中性操作
+            injectMathNeutral1()
+            injectDupPopSequence()
+        }
+        super.visitInsn(opcode)
+    }
+}
