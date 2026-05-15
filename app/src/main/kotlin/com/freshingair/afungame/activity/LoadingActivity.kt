@@ -1,10 +1,14 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.activity
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Handler
 import android.widget.ProgressBar
+import com.freshingair.afungame.BuildConfig
+import com.freshingair.afungame.FadeImageView
+import com.freshingair.afungame.R
+import com.freshingair.afungame.autoFullScreen
 import java.util.Random
 import com.unity3d.player.UnityPlayerActivity
 

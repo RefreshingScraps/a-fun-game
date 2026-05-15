@@ -1,13 +1,15 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.ad
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import com.freshingair.afungame.SplashActivity.Companion.goToMainActivity
+import com.freshingair.afungame.activity.BrowserActivity
+import com.freshingair.afungame.BuildConfig
+import com.freshingair.afungame.activity.SplashActivity.Companion.goToMainActivity
 import com.kwad.sdk.api.KsAdSDK
 import com.kwad.sdk.api.KsLoadManager.RewardVideoAdListener
 import com.kwad.sdk.api.KsLoadManager.SplashScreenAdListener
@@ -85,11 +87,9 @@ object KsAd {
                                 override fun onDownloadTipsDialogCancel() {}
                             })
                         container.removeAllViews()
-                        view.setLayoutParams(
-                            ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            )
+                        view.layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         container.addView(view)
                     }
@@ -120,30 +120,32 @@ object KsAd {
             .build()
         if (mRewardVideoAd != null && mRewardVideoAd!!.isAdEnable) {
             mRewardVideoAd!!.setRewardAdInteractionListener(
-                    object : RewardAdInteractionListener {
-                        override fun onAdClicked() {}
-                        override fun onPageDismiss() {}
-                        override fun onVideoPlayError(code: Int, extra: Int) {
-                            loadingDialog.dismiss()
-                            goToLoadingActivity(context)
-                        }
-                        override fun onVideoPlayEnd() {}
-                        override fun onVideoSkipToEnd(p0: Long) {}
-                        override fun onVideoPlayStart() {}
-                        override fun onRewardVerify() {
-                            // 激励视频⼴告获取激励
-                            goToLoadingActivity(context)
-                        }
+                object : RewardAdInteractionListener {
+                    override fun onAdClicked() {}
+                    override fun onPageDismiss() {}
+                    override fun onVideoPlayError(code: Int, extra: Int) {
+                        loadingDialog.dismiss()
+                        goToLoadingActivity(context)
+                    }
 
-                        override fun onRewardVerify(p0: Map<String?, Any?>?) {
-                            // 激励视频⼴告获取激励
-                            goToLoadingActivity(context)
-                        }
-                        override fun onRewardStepVerify(taskType: Int, currentTaskStatus: Int) {}
-                        override fun onExtraRewardVerify(p0: Int) {}
-                    })
+                    override fun onVideoPlayEnd() {}
+                    override fun onVideoSkipToEnd(p0: Long) {}
+                    override fun onVideoPlayStart() {}
+                    override fun onRewardVerify() {
+                        // 激励视频⼴告获取激励
+                        goToLoadingActivity(context)
+                    }
+
+                    override fun onRewardVerify(p0: Map<String?, Any?>?) {
+                        // 激励视频⼴告获取激励
+                        goToLoadingActivity(context)
+                    }
+
+                    override fun onRewardStepVerify(taskType: Int, currentTaskStatus: Int) {}
+                    override fun onExtraRewardVerify(p0: Int) {}
+                })
         }
-        mRewardVideoAd?.showRewardVideoAd(context as Activity?, videoPlayConfig);
+        mRewardVideoAd?.showRewardVideoAd(context as Activity?, videoPlayConfig)
     }
     fun goToLoadingActivity(context: Context){
         val intent = Intent(context, BrowserActivity::class.java)

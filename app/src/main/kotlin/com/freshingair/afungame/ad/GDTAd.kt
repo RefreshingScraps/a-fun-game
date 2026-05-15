@@ -1,12 +1,17 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.ad
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import com.freshingair.afungame.activity.BrowserActivity
+import com.freshingair.afungame.R
+import com.freshingair.afungame.activity.SplashActivity
+import com.freshingair.afungame.others.DialogUtils
+import com.freshingair.afungame.others.DialogUtils.setAlertDialog
 import com.qq.e.ads.rewardvideo.RewardVideoAD
 import com.qq.e.ads.rewardvideo.RewardVideoADListener
 import com.qq.e.ads.splash.SplashAD
@@ -95,7 +100,7 @@ object GDTAd {
                     if (!it && rewardVideoAD!!.isValid) {
                         //广告展示检查2：当前广告数据还没有展示过
                         //广告展示检查3：展示广告前判断广告数据未过期
-                        rewardVideoAD!!.showAD();
+                        rewardVideoAD!!.showAD()
                     }
                 }
             }
@@ -111,7 +116,7 @@ object GDTAd {
             override fun onVideoComplete() {}
             override fun onADClose() {
                 if(isViewedAd) {
-                    AlertDialog.Builder(context)
+                    DialogUtils.getAlertDialog(context, true)
                         .setIcon(R.drawable.ic_info)
                         .setTitle("一般性提示")
                         .setMessage("还需再观看一次。😜")
@@ -130,6 +135,7 @@ object GDTAd {
                             if (loadingDialog.isShowing) return@setPositiveButton
 
                             loadingDialog.show()
+                            setAlertDialog(context, loadingDialog)
 
                             KsAd.rewardAd(context, loadingDialog)
                         }

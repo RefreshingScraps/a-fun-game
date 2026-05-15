@@ -1,4 +1,4 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.activity
 
 import android.app.Dialog
 import android.hardware.SensorManager
@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
+import com.freshingair.afungame.R
 import com.plattysoft.leonids.ParticleSystem
 import java.util.Random
 

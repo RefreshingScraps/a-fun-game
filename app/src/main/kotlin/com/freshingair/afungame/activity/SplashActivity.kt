@@ -1,4 +1,4 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.activity
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,6 +8,13 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.freshingair.afungame.BuildConfig
+import com.freshingair.afungame.FadeImageView
+import com.freshingair.afungame.R
+import com.freshingair.afungame.SplashBroadcastCenter
+import com.freshingair.afungame.ad.GDTAd
+import com.freshingair.afungame.ad.KsAd
+import com.freshingair.afungame.autoFullScreen
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {

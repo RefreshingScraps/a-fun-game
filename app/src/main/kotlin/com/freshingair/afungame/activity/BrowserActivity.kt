@@ -1,4 +1,4 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -13,8 +13,10 @@ import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
-import com.freshingair.afungame.DialogUtils.DialogUtils
-import com.freshingair.afungame.DialogUtils.setAlertDialog
+import com.freshingair.afungame.R
+import com.freshingair.afungame.autoFullScreen
+import com.freshingair.afungame.others.DialogUtils
+import com.freshingair.afungame.others.DialogUtils.setAlertDialog
 
 class BrowserActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -95,7 +97,7 @@ class BrowserActivity : AppCompatActivity() {
                     .setCancelable(false)
                     .create()
                 dlg.show()
-                setAlertDialog(this@BrowserActivity, dlg, null)
+                setAlertDialog(this@BrowserActivity, dlg)
                     // ContextCompat.getColor(this@BrowserActivity, R.color.black))
             }
         }

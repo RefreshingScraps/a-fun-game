@@ -1,8 +1,11 @@
-package com.freshingair.afungame
+package com.freshingair.afungame.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.widget.SwitchCompat
+import com.freshingair.afungame.R
+import com.freshingair.afungame.autoFullScreen
+import com.freshingair.afungame.others.SPUtils
 
 class SettingsActivity : AppCompatActivity() {
 
