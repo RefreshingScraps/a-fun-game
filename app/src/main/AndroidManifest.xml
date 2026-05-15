@@ -46,6 +46,7 @@
         <activity android:name=".SettingsActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".BrowserActivity" android:exported="true" android:screenOrientation="landscape"/>
         <activity android:name=".junkcode.Vz" android:exported="true" android:screenOrientation="landscape"/>
+        <activity android:name=".WinnerActivity" android:exported="true" />
             
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <!-- 声明SDK所需要的组件 -->

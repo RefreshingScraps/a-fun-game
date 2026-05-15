@@ -3,9 +3,10 @@ agp = "8.13.0"
 annotation = "1.9.1"
 asm = "9.9.1"
 asmCommons = "9.9.1"
-kotlin = "2.1.0"
+kotlin = "2.3.21"
 coreKtx = "1.17.0"
 appcompat = "1.7.1"
+lottie = "6.7.1"
 material = "1.13.0"
 constraintlayout = "2.2.1"
 union = "4.680.1550"
@@ -21,6 +22,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asmCommons" }
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 union = { module = "com.qq.e.union:union", version.ref = "union" }

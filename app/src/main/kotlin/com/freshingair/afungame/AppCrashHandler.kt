@@ -2,6 +2,7 @@ package com.freshingair.afungame
 
 import android.content.Context
 import android.util.Log
+import com.freshingair.afungame.DialogUtils.DialogUtils
 import com.freshingair.afungame.DialogUtils.setAlertDialog
 import java.io.File
 import java.io.PrintWriter

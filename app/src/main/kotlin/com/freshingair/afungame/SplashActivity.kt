@@ -15,7 +15,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         autoFullScreen()
         setContentView(R.layout.activity_splash)
-
+        
         val broadcastCenter = ViewModelProvider(this)[SplashBroadcastCenter::class.java]
         // 观察消息变化（自动感知生命周期，无需手动注销）
         broadcastCenter.messageEvent.observe(this) { message ->

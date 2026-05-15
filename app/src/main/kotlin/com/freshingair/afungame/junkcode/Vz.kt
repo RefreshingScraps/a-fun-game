@@ -1,9 +1,15 @@
 package com.freshingair.afungame.junkcode
 
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.widget.RelativeLayout
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
+import com.freshingair.afungame.junkcode.Hg7Bs9Qw2.A10
+import com.freshingair.afungame.junkcode.Hg7Bs9Qw2.A14
+import com.freshingair.afungame.junkcode.Hg7Bs9Qw2.A16
+import com.freshingair.afungame.junkcode.Vb2Gd7Za9.Companion.Bd6Fe3Ng7
 import com.kwad.components.ad.interstitial.c.b.J
 import com.kwad.sdk.c.a.a.L
 import com.kwad.sdk.core.d.c.w
@@ -62,16 +68,11 @@ import com.unity3d.player.UnityPlayer
         A4.B4.C4().x4()
         A5.B5.C5().x5()
         A6.B6.C6().x6()
-        A7.B7.C7().x7()
         A8.B8.C8().x8()
         A9.B9.C9().x9()
-        A10.B10.C10().x10()
         A11.B11.C11().x11()
         A12.B12.C12().x12()
         A13.B13.C13().x13()
-        A14.B14.C14().x14()
-        A15.B15.C15().x15()
-        A16.B16.C16().x16()
         A17.B17.C17().x17()
         A18.B18.C18().x18()
         A19.B19.C19().x19()
@@ -107,7 +108,8 @@ import com.unity3d.player.UnityPlayer
     companion object {
         @JvmStatic fun ac5Td9Bm1() = Vb2Gd7Za9().also { println("Companion created") }
         operator fun invoke() = "Tm9Bw3Ej6".also(::println)
-        @Keep private class Bd6Fe3Ng7 { fun ce9Dc2Qh4() = "Vb2Gd7Za9Qf5Sc8Rh1Lr4Ew8Pz11zP8wE4rL1hRc8fS5fQ9aZ7dGbV" }
+        @Keep
+        class Bd6Fe3Ng7 { fun ce9Dc2Qh4() = "Vb2Gd7Za9Qf5Sc8Rh1Lr4Ew8Pz11zP8wE4rL1hRc8fS5fQ9aZ7dGbV" }
     }
     init { println("Initialized: $qf5Sc8Rh1") }
     fun df3Gh8Mj2() = listOf(toString(),qf5Sc8Rh1,"Pa7Ub3Jf5").also(::println)
@@ -171,15 +173,10 @@ import com.unity3d.player.UnityPlayer
             RelativeLayout.LayoutParams.MATCH_PARENT
         ))
 
-        Hg7Bs9Qw2()
         Vb2Gd7Za9.ac5Td9Bm1()
-        Vb2Gd7Za9()
-        Ec7Jh2Pf6()
-        Jg4Vb9Sc5()
-        Nc2Ez7Fd1()
         dslFirstLevel { Vb2Gd7Za9.Cz8Rd2Fn4.Lr4Ew8Pz1() }
-        "test".extRevStr()
-        3.extSquareList()
+        Hg7Bs9Qw2.A15.B15.C15().x15().extRevStr()
+        Hg7Bs9Qw2.A7.B7.C7().x7().extSquareList()
         Any().extScopeBlock {}
         dslTopRoot { dslFirstLevel { dslSecondLevel {} } }
 
@@ -190,7 +187,7 @@ import com.unity3d.player.UnityPlayer
         c(this)
         d(this)
 
-        w("", "")
+        w(A14.B14.C14().x14(),A10.B10.C10().x10())
 
         J(this)
         // K(this)

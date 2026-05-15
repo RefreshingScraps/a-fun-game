@@ -98,6 +98,12 @@ dependencies {
     implementation libs.asm.commons
     
     implementation libs.androidx.annotation
+
+    // 彩带粒子动画
+    implementation files("libs/LeonidsLib-1.3.2.jar")
+    // 闪光动画
+    implementation libs.lottie
+
 }
 
 // ========== ASM 花指令插桩（完全线性版本 - 无跳转）==========

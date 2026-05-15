@@ -13,6 +13,7 @@ import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
+import com.freshingair.afungame.DialogUtils.DialogUtils
 import com.freshingair.afungame.DialogUtils.setAlertDialog
 
 class BrowserActivity : AppCompatActivity() {
