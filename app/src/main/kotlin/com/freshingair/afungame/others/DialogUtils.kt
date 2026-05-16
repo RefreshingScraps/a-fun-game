@@ -16,6 +16,11 @@ import io.noties.markwon.ext.tasklist.TaskListPlugin
 import io.noties.markwon.image.ImagesPlugin
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 
 object DialogUtils {
     fun getAlertDialog(context: Context?, isLight: Boolean): AlertDialog.Builder {
@@ -35,6 +40,48 @@ object DialogUtils {
         val alertTitleId = context.resources.getIdentifier("alertTitle", "id", "android")
         val title: TextView = dlg.findViewById(alertTitleId)
         title.setTextColor(ContextCompat.getColor(context,R.color.holo_blue_bright))
+    }
+    @Composable
+    fun Material3AlertDialog(
+        onDismissRequest: () -> Unit,
+        onConfirmation: () -> Unit,
+        dialogTitle: String,
+        dialogText: String,
+        confirmText: String = "Confirm",
+        dismissText: String = "Dismiss",
+        icon: ImageVector? = null) {
+        androidx.compose.material3.AlertDialog(
+            icon = {
+                if(icon != null) Icon(icon, contentDescription = "Example Icon")
+            },
+            title = {
+                Text(text = dialogTitle)
+            },
+            text = {
+                Text(text = dialogText)
+            },
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirmation()
+                    }
+                ) {
+                    Text(confirmText)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onDismissRequest()
+                    }
+                ) {
+                    Text(dismissText)
+                }
+            }
+        )
     }
     /**
      * 从 assets 读取 md 文件并显示在 Dialog
@@ -70,9 +117,6 @@ object DialogUtils {
         dlg.show()
         setAlertDialog(context, dlg)
     }
-    /**
-     * 读取 assets 中的 .md 文件
-     */
     private fun readMarkdownFromAssets(context: Context, fileName: String): String {
         return try {
             val inputStream = context.assets.open(fileName)
